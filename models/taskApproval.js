@@ -3,21 +3,23 @@ const uniqueValidator = require("mongoose-unique-validator");
 
 const Schema = mongoose.Schema;
 
-const taskSchema = new Schema(
+const taskApproval = new Schema(
   {
-    title: { type: String, required: true },
+    taskId: { type: mongoose.Types.ObjectId, required: true, ref: "Task" },
+    //title: { type: String, required: true },
     status: {
       type: String,
       enum: ["APPROVED", "REJECTED", "DONE_PENDING_APPROVEL", "DO", "DOING"],
       default: "DO",
       required: true,
     },
-    note: { type: String },
+    employeeNotes: { type: String },
+    evaluatorNotes: { type: String },
   },
   //options
   { timestamps: true }
 );
 
-taskSchema.plugin(uniqueValidator);
+taskApproval.plugin(uniqueValidator);
 
-module.exports = mongoose.model("Task", taskSchema);
+module.exports = mongoose.model("TaskApproval", taskApproval);

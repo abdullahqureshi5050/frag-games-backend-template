@@ -1,5 +1,4 @@
 const express = require("express");
-const { check } = require("express-validator");
 
 const tasksController = require("../controllers/tasks-controllers");
 const fileUpload = require("../middleware/file-upload");
@@ -15,6 +14,10 @@ router.post(
   tasksController.requestApproval
 );
 router.post("/add-task", middlewares.addTask(), tasksController.addTask);
-router.post("/update-task", tasksController.updateTask);
+router.post(
+  "/update-task",
+  tasksController.updateTask,
+  tasksController.updateTask
+);
 
 module.exports = router;

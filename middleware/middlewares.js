@@ -35,6 +35,7 @@ const addTask = () => {
     check("title").not().isEmpty(),
     check("description").not().isEmpty(),
     check("status").not().isEmpty(),
+    //check("deadline").trim().isDate().withMessage("Please input a valid date"),
   ];
 };
 
@@ -59,10 +60,22 @@ const requestApproval = () => {
   ];
 };
 
+const updateTask = () => {
+  return [
+    check("email").isEmail(),
+    check("title").notEmpty(),
+    check("status")
+      .notEmpty()
+      .isIn(["DONE_PENDING_APPROVEL", "DO", "DOING"])
+      .withMessage("Please provide a vaild role"),
+    check("description").notEmpty(),
+  ];
+};
 module.exports = {
   loginMiddleware,
   signupMiddleware,
   addTask,
   requestApproval,
+  updateTask,
   validate,
 };

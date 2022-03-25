@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 
 const usersRoutes = require("./routes/users-routes");
 const tasksRoutes = require("./routes/tasks-routes");
+const tasksApprovalRoutes = require("./routes/tasksApproval-routes");
+
 const HttpError = require("./util/http-error");
 
 const app = express();
@@ -28,7 +30,7 @@ app.use((req, res, next) => {
 
 app.use("/api/users", usersRoutes);
 app.use("/api/tasks", tasksRoutes);
-
+app.use("/api/tasks-approval", tasksApprovalRoutes);
 app.use((req, res, next) => {
   const error = new HttpError("Could not find this route.", 404);
   throw error;

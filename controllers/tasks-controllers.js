@@ -5,21 +5,21 @@ const jwt = require("jsonwebtoken");
 const HttpError = require("../util/http-error");
 const Task = require("../models/task");
 const User = require("../models/user");
+const TaskApproval = require("../models/taskApproval");
 
 const getTasks = async (req, res, next) => {
   let tasks;
   try {
     tasks = await Task.find();
   } catch (err) {
-    const error = new HttpError(
-      "Fetching data failed, please try again later.",
-      500
-    );
-    return next(error);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.mapped() });
+    }
   }
   res.json({ allTasks: tasks });
 };
 
+//----------------------------------------requestApproval------------------------------------------------------
 //DONE_PENDING_APPROVEL
 const requestApproval = async (req, res, next) => {
   const errors = validationResult(req);
@@ -28,51 +28,55 @@ const requestApproval = async (req, res, next) => {
     return res.status(422).json({ errors: errors.mapped() });
   }
 
-  const { status, id, email } = req.body;
-
-  let currentUser;
-  try {
-    currentUser = await User.findOne({ email });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ error: `user not found or somthing went wrong on server side` });
-  }
-
-  if (!currentUser) {
-    return res.status(422).json({ error: `user not found` });
-  }
+  const { status, id, email, employeeNotes, evaluatorNotes, taskId } = req.body;
 
   try {
-    const updateTask = await Task.updateOne(
-      { _id: id },
-      { status: status }
-    ).then((response) => {
-      return res.json({ res: response });
-    });
-    if (!updateTask) throw "Task id not found!";
+    let update = {};
+    if (email) update.email = email;
+    if (status) update.status = status;
+
+    try {
+      task = await Task.findOneAndUpdate({ _id: id }, update);
+      if (!task) throw "Task id not found!";
+    } catch (err) {
+      return res.status(500).json({ errors: `Task update failed ${err}` });
+    }
   } catch (err) {
-    return res
-      .status(404)
-      .json({ error: `Task id not found or somthing else went wrong ${err}` });
+    return res.status(503).json({ errors: `Update to database failed` });
   }
-  await updateTask.save();
-  return res.json({ success: true });
+
+  try {
+    let approvalTaskPayload = {};
+    if (employeeNotes) approvalTaskPayload.employeeNotes = employeeNotes;
+    if (evaluatorNotes) approvalTaskPayload.evaluatorNotes = evaluatorNotes;
+    if (email) approvalTaskPayload.email = email;
+    if (status) approvalTaskPayload.status = status;
+    if (taskId) approvalTaskPayload.taskId = taskId;
+    console.log(approvalTaskPayload);
+
+    const createApprovalTask = new TaskApproval(approvalTaskPayload);
+
+    await createApprovalTask.save();
+  } catch (err) {
+    const error = new Error(
+      `Sent for approval failed, Somthing went wrong.${err}`,
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ success: true });
 };
+
+//---------------------------------requestApproval END----------------------------------
 
 const addTask = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return next(
-      new HttpError(
-        "Invalid inputs passed, please check your data.",
-        errors,
-        422
-      )
-    );
+    return res.status(422).json({ errors: errors.mapped() });
   }
 
-  const { title, description, status, email, jwtEmail } = req.body;
+  const { title, description, status, email, deadline, jwtEmail } = req.body;
 
   let currentUser;
   try {
@@ -117,7 +121,9 @@ const addTask = async (req, res, next) => {
     title,
     description,
     status,
+    deadline,
   });
+
   console.log(createdTask);
   try {
     console.log(createdTask);
@@ -133,13 +139,16 @@ const addTask = async (req, res, next) => {
   res.status(201).json({ sucess: true, taskID: createdTask.id });
 };
 
+//-----------------------updateTask---------------------------------------------
+
 const updateTask = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.mapped() });
   }
 
-  const { id, title, description, status, email, jwtEmail } = req.body;
+  const { id, title, description, status, email, deadline, jwtEmail } =
+    req.body;
 
   try {
     let update = {};
@@ -147,12 +156,13 @@ const updateTask = async (req, res, next) => {
     if (email) update.email = email;
     if (description) update.description = description;
     if (status) update.status = status;
+    if (deadline) update.deadline = deadline;
 
     try {
-      task = await Task.findOneAndUpdate({ id }, update);
-      if (!task) throw "user not found!";
+      task = await Task.findOneAndUpdate({ _id: id }, update);
+      if (!task) throw "Task id not found!";
     } catch (err) {
-      return res.status(404).json({ errors: `user not found` });
+      return res.status(500).json({ errors: `Task update failed ${err}` });
     }
 
     //users.save();

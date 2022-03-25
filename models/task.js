@@ -8,6 +8,7 @@ const taskSchema = new Schema(
     assignee: { type: Schema.Types.ObjectId },
     title: { type: String, required: true },
     description: { type: String, required: true },
+    deadline: { type: Date, required: true },
     status: {
       type: String,
       enum: ["APPROVED", "REJECTED", "DONE_PENDING_APPROVEL", "DO", "DOING"],
