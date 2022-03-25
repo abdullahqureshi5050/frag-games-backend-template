@@ -16,9 +16,37 @@ const getTasks = async (req, res, next) => {
       return res.status(422).json({ errors: errors.mapped() });
     }
   }
+
   res.json({ allTasks: tasks });
 };
 
+const populateTaskwithUsers = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.mapped() });
+  }
+
+  const { assignee } = req.body;
+  if (!assignee)
+    return res.status(404).json({
+      assignee: `invalid assignee id or no assigned task found on provided assignee id`,
+    });
+  try {
+    await Task.findOne({
+      assignee: assignee,
+    })
+      .populate({
+        path: "assignee",
+        populate: { path: "TaskApproval" },
+      })
+      .then((response) => {
+        //console.log("response  ", response);
+        return res.json(response);
+      });
+  } catch (error) {
+    console.log(error);
+  }
+};
 //----------------------------------------requestApproval------------------------------------------------------
 //DONE_PENDING_APPROVEL
 const requestApproval = async (req, res, next) => {
@@ -178,3 +206,4 @@ exports.getTasks = getTasks;
 exports.addTask = addTask;
 exports.updateTask = updateTask;
 exports.requestApproval = requestApproval;
+exports.populateTaskwithUsers = populateTaskwithUsers;

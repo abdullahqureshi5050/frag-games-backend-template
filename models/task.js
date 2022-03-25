@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const taskSchema = new Schema(
   {
-    assignee: { type: Schema.Types.ObjectId },
+    assignee: { type: Schema.Types.ObjectId, ref: "User" },
     title: { type: String, required: true },
     description: { type: String, required: true },
     deadline: { type: Date, required: true },

@@ -60,9 +60,24 @@ const requestApproval = () => {
   ];
 };
 
+const approveTask = () => {
+  return [
+    check("taskId").notEmpty().withMessage("Please provide a vaild task id"),
+    check("email")
+      .normalizeEmail()
+      .isEmail()
+      .withMessage("Valid Email is required"),
+    check("status")
+      .isIn(["APPROVED", "REJECTED", "DONE_PENDING_APPROVEL", "DO", "DOING"])
+      .withMessage(
+        `Please provide a vaild role. valid roles: "APPROVED", "REJECTED", "DONE_PENDING_APPROVEL", "DO", "DOING" `
+      ),
+  ];
+};
+
 const updateTask = () => {
   return [
-    check("email").isEmail(),
+    check("email").isEmail().withMessage("Valid Email is required"),
     check("title").notEmpty(),
     check("status")
       .notEmpty()
@@ -71,11 +86,21 @@ const updateTask = () => {
     check("description").notEmpty(),
   ];
 };
+
+const populateTasks = () => {
+  return [
+    check("assignee")
+      .notEmpty()
+      .withMessage("Please provide a vaild assignee id"),
+  ];
+};
 module.exports = {
   loginMiddleware,
   signupMiddleware,
   addTask,
   requestApproval,
   updateTask,
+  approveTask,
+  populateTasks,
   validate,
 };

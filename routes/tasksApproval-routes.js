@@ -8,6 +8,10 @@ const router = express.Router();
 
 router.get("/", tasksApprovalController.getAllPendingApprovals);
 
-router.post("/approve-task", tasksApprovalController.approveTask);
+router.post(
+  "/approve-task",
+  middlewares.approveTask(),
+  tasksApprovalController.approveTask
+);
 
 module.exports = router;
