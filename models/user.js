@@ -9,6 +9,7 @@ const userSchema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
     designation: { type: String, required: true },
+    assignedBy: { type: mongoose.Types.ObjectId, required: true },
     role: {
       type: String,
       enum: ["EMPLOYEE", "ADMIN", "BOARD_MANAGER"],

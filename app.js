@@ -4,6 +4,7 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+require("./middleware/jwt");
 
 const usersRoutes = require("./routes/users-routes");
 const tasksRoutes = require("./routes/tasks-routes");

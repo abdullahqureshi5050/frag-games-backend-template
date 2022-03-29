@@ -7,6 +7,8 @@ const HttpError = require("../util/http-error");
 const User = require("../models/user");
 const user = require("../models/user");
 
+const jwtMiddleware = require("../middleware/jwt");
+
 const updateDOB = async (req, res, next) => {
   const { email, dateOfBirth } = req.body;
 
@@ -191,6 +193,8 @@ const login = async (req, res, next) => {
       .json({ errors: "Invalid credentials, could not log you in." });
   }
 
+  const token = jwtMiddleware.signAndGetToken();
+  console.log(token);
   res.json({
     userId: existingUser.id,
     email: existingUser.email,
